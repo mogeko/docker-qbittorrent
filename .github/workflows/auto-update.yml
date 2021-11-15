@@ -55,7 +55,7 @@ jobs:
           tags: |
             type=edge
             type=schedule,pattern={{date 'YYYYMMDD'}}
-            type=raw,${{ needs.check.outputs.version }}
+            type=raw,${{ needs.check.outputs.new_ver }}
             type=raw,latest
 
       - name: Build and push Docker image
@@ -67,7 +67,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            VERSION=${{ needs.check.outputs.version }}
+            VERSION=${{ needs.check.outputs.new_ver }}
 
       - name: Save metadata
         run: echo ${{ toJSON(steps.build.outputs.metadata) }} > ${{ github.workspace }}/meta.json
