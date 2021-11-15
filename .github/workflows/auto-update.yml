@@ -2,7 +2,7 @@ name: update-bot
 
 on:
   schedule:
-    - cron: '00 23 * * *'
+    - cron: '50 23 * * *'
 
 env:
   REGISTRY: ghcr.io
