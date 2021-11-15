@@ -60,6 +60,7 @@ jobs:
             type=edge
             type=schedule,pattern={{date 'YYYYMMDD'}}
             type=raw,${{ needs.check.outputs.version }}
+            type=raw,latest
 
       - name: Build and push Docker image
         id: build
