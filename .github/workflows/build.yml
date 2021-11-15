@@ -52,7 +52,7 @@ jobs:
           tags: |
             type=edge
             type=schedule,pattern={{date 'YYYYMMDD'}}
-            type=raw,${{ needs.check.outputs.version }}
+            type=raw,${{ needs.check.outputs.new_ver }}
             type=raw,latest
 
       - name: Save status
