@@ -8,6 +8,10 @@ on:
     branches:
       - master
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -44,20 +48,21 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Build image
-        run: |
-          docker build . \
-            --build-arg "VERSION=${{ needs.check.outputs.version }}" \
-            --label "BUILD_ID=${GITHUB_RUN_ID}" \
-            --label "BUILD_SERVER=${GITHUB_SERVER_URL}" \
-            --label "OS=${RUNNER_OS}" \
-            --tag qbittorrent
-      
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=edge
+            type=schedule,pattern={{date 'YYYYMMDD'}}
+            type=raw,${{ needs.check.outputs.version }}
+
       - name: Save status
-        run: docker images > ${{ github.workspace }}/images.txt
+        run: echo ${{ steps.meta.outputs.json }} > ${{ github.workspace }}/status.json
 
       - name: Update status
         uses: actions/upload-artifact@v2
         with:
-          name: images
-          path: ${{ github.workspace }}/images.txt
+          name: status
+          path: ${{ github.workspace }}/status.json
