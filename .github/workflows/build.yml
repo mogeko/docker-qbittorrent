@@ -59,7 +59,7 @@ jobs:
             type=raw,${{ needs.check.outputs.version }}
 
       - name: Save status
-        run: echo ${{ steps.meta.outputs.json }} > ${{ github.workspace }}/status.json
+        run: echo ${{ toJSON(steps.meta.outputs.json) }} > ${{ github.workspace }}/status.json
 
       - name: Update status
         uses: actions/upload-artifact@v2
