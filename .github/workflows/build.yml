@@ -28,8 +28,7 @@ jobs:
           fi
           echo "::set-output name=version::${NEW_VER}"
         env:
-          ALPINE_PKG_URL: https://pkgs.alpinelinux.org/package/edge/testing/x86_6
-4/qbittorrent-nox
+          ALPINE_PKG_URL: https://pkgs.alpinelinux.org/package/edge/testing/x86_64/qbittorrent-nox
           GHCO_URL: https://github.com/mogeko/docker-qbittorrent/pkgs/container/qbittorrent
 
   build:
