@@ -4,12 +4,17 @@
 
 Docker image for qBittorrent. 
 
+- Tiny size
+- Enable rootless[^1]
+- Enable `QBT_*` options[^2]
+- Keep updating
+
 ## Usage
 
 Pull this image:
 
 ```shell
-docker pull ghcr.io/mogeko/qbittorrent:edge
+docker pull ghcr.io/mogeko/qbittorrent
 ```
 
 Run with docker cli:
@@ -17,6 +22,7 @@ Run with docker cli:
 ```shell
 docker run -d \
   --name qbittorrent \
+  --user 1000:100 `#optional` \
   -e QBT_WEBUI_PORT=8080 \
   -p 6881:6881 \
   -p 6881:6881/udp \
@@ -35,6 +41,7 @@ services:
   qbittorrent:
     image: ghcr.io/mogeko/qbittorrent
     container_name: qbittorrent
+    user: 1000:100 #optional
     environment:
       - QBT_WEBUI_PORT=8080
     volumes:
@@ -58,12 +65,12 @@ Container images are configured using parameters passed at runtime (such as thos
 | `-e QBT_WEBUI_PORT=8080` | Change the Web UI port        |
 | `-v /downloads`          | Location of downloads on disk |
 
-The `qbittorrent-nox`'s options may be supplied via environment variables[^1]. For option named 'parameter-name', environment variable name is `QBT_PARAMETER_NAME` (in uppercase, `-` replaced with `_`). To pass flag values, set the variable to `1` or `TRUE`. Here is an example we already in used: `-e QBT_WEBUI_PORT=8080`.
+The `qbittorrent-nox`'s options may be supplied via environment variables[^2]. For option named 'parameter-name', environment variable name is `QBT_PARAMETER_NAME` (in uppercase, `-` replaced with `_`). To pass flag values, set the variable to `1` or `TRUE`. Here is an example we already in used: `-e QBT_WEBUI_PORT=8080`.
 
 More help message about `qbittorrent-nox`, you can get via:
 
 ```shell
-docker run -it ghcr.io/mogeko/qbittorrent:edge --help
+docker run -it ghcr.io/mogeko/qbittorrent --help
 ```
 
 ## License
@@ -73,7 +80,8 @@ The code in this project is released under the [GPL-3.0 License][license].
 
 <!-- footnote -->
 
-[^1]: The option `QBT_PROFILE` does not support.
+[^1]: This image should be able to work with [podman], but it has not been tested.
+[^2]: The option `QBT_PROFILE` does not support.
 
 <!-- badge -->
 
@@ -84,3 +92,4 @@ The code in this project is released under the [GPL-3.0 License][license].
 
 [docker-compose]: https://docs.docker.com/compose
 [license]: https://github.com/mogeko/docker-qbittorrent/blob/master/LICENSE
+[podman]: https://podman.io
