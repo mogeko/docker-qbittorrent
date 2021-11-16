@@ -27,6 +27,7 @@ docker run -d \
   -p 6881:6881 \
   -p 6881:6881/udp \
   -p 8080:8080 \
+  -v /path/to/config:/config \
   -v /path/to/downloads:/downloads \
   --restart unless-stopped \
   ghcr.io/mogeko/qbittorrent
@@ -45,6 +46,7 @@ services:
     environment:
       - QBT_WEBUI_PORT=8080
     volumes:
+      - /path/to/config:/config
       - /path/to/downloads:/downloads
     ports:
       - 6881:6881
@@ -63,6 +65,7 @@ Container images are configured using parameters passed at runtime (such as thos
 | `-p 6881/udp`            | udp connection port           |
 | `-p 8080`                | The Web UI port               |
 | `-e QBT_WEBUI_PORT=8080` | Change the Web UI port        |
+| `-v /config`             | Save the configuration files  |
 | `-v /downloads`          | Location of downloads on disk |
 
 The `qbittorrent-nox`'s options may be supplied via environment variables[^2]. For option named 'parameter-name', environment variable name is `QBT_PARAMETER_NAME` (in uppercase, `-` replaced with `_`). To pass flag values, set the variable to `1` or `TRUE`. Here is an example we already in used: `-e QBT_WEBUI_PORT=8080`.
