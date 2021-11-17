@@ -8,33 +8,23 @@ on:
     branches:
       - master
 
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository_owner }}/qbittorrent
-
 jobs:
   check:
     runs-on: ubuntu-latest
     outputs:
-      old_ver: ${{ steps.check_ver.outputs.old_ver }}
       new_ver: ${{ steps.check_ver.outputs.new_ver }}
     steps:
       - name: Check version
         id: check_ver
         run: |
-          get_ver() (curl -s "$@" | grep -Po "(\d+\.)+\d+\-r\d+" | head -1)
-          OLD_VER=$(get_ver ${GHCO_URL})
-          NEW_VER=$(get_ver ${ALPINE_PKG_URL})
-          echo "::set-output name=old_ver::${OLD_VER}"
+          NEW_VER=$(curl -s "${ALPINE_PKG_URL}" | grep -Po "(\d+\.)+\d+\-r\d+" | head -1)
           echo "::set-output name=new_ver::${NEW_VER}"
         env:
           ALPINE_PKG_URL: https://pkgs.alpinelinux.org/package/edge/testing/x86_64/qbittorrent-nox
-          GHCO_URL: https://github.com/mogeko/docker-qbittorrent/pkgs/container/qbittorrent
 
-  build:
+  meta:
     runs-on: ubuntu-latest
     needs: check
-    if: ${{ needs.check.outputs.old_ver != needs.check.outputs.new_ver }}
     permissions:
       packages: write
       contents: read
@@ -48,7 +38,9 @@ jobs:
         id: meta
         uses: docker/metadata-action@548e2346a9987b56d8a4104fe776321ff8e23440
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: |
+            ${{ github.repository_owner }}/qbittorrent
+            ghcr.io/${{ github.repository_owner }}/qbittorrent
           tags: |
             type=edge
             type=schedule,pattern={{date 'YYYYMMDD'}}
