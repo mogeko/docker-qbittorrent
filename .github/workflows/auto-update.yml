@@ -24,23 +24,24 @@ jobs:
       - name: Check version
         id: check_ver
         run: |
+          OLD_VER=$(curl -s "${GHCR_URL}" | grep -Po "(\d+\.){2}\d+\-r\d+" | head -1)
           NEW_TAG=$(curl -s "${REPO_TAGS}" | grep -Po "release-(\d+\.){2}\d+\.zip" | head -1)
           LIB_VER=$(jq -r '.libtorrent' ./latest.json)
           QBT_VER=$(jq -r '.qbittorrent' ./latest.json)
           PKG_REL=$(jq -r '.pkgrel' ./latest.json)
           if [ ${{ github.event_name }} == 'push' ]; then
-            echo "::set-output name=img_ver::${QBT_VER}-r${PKG_REL}"
-            echo "::set-output name=qbt_ver::${QBT_VER}"
-            echo "::set-output name=is_new::yes"
-          elif [ "${NEW_TAG:8:5}" != "${QBT_VER}" ]; then
-            echo "::set-output name=img_ver::${NEW_TAG:8:5}-r0"
-            echo "::set-output name=qbt_ver::${NEW_TAG:8:5}"
-            echo "::set-output name=is_new::yes"
+            IMG_VER="${QBT_VER}-r${PKG_REL}"
           else
-            echo "::set-output name=is_new::no"
+            QBT_VER="${NEW_TAG:8:5}"
+            IMG_VER="${QBT_VER}-r0"
           fi
+          IS_NEW=$([[ "${IMG_VER}" != "${OLD_VER}" ]] && echo "yes" || echo "no")
+          echo "::set-output name=img_ver::${IMG_VER}"
+          echo "::set-output name=qbt_ver::${QBT_VER}"
           echo "::set-output name=lib_ver::${LIB_VER}"
+          echo "::set-output name=is_new::${IS_NEW}"
         env:
+          GHCR_URL: https://github.com/mogeko/docker-qbittorrent/pkgs/container/qbittorrent
           REPO_TAGS: https://github.com/qbittorrent/qBittorrent/tags
 
   build:
