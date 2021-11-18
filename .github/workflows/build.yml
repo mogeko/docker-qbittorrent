@@ -17,22 +17,10 @@ jobs:
       - name: Check version
         id: check_ver
         run: |
-          NEW_VER=$(curl -s "${ALPINE_PKG_URL}" | grep -Po "(\d+\.)+\d+\-r\d+" | head -1)
-          echo "::set-output name=new_ver::${NEW_VER}"
+          NEW_TAG=$(curl -s "${REPO_TAGS}" | grep -Po "release-(\d+\.){2}\d+\.zip" | head -1)
+          echo "::set-output name=new_ver::${NEW_TAG:8:5}"
         env:
-          ALPINE_PKG_URL: https://pkgs.alpinelinux.org/package/edge/testing/x86_64/qbittorrent-nox
-
-  build:
-    runs-on: ubuntu-latest
-    needs: check
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-
-      - name: Build
-        run: make build
+          REPO_TAGS: https://github.com/qbittorrent/qBittorrent/tags
 
   meta:
     runs-on: ubuntu-latest
@@ -56,7 +44,7 @@ jobs:
           tags: |
             type=edge
             type=schedule,pattern={{date 'YYYYMMDD'}}
-            type=raw,${{ needs.check.outputs.new_ver }}
+            type=raw,${{ needs.check.outputs.new_ver }}-r0
             type=raw,latest
 
       - name: Save status
