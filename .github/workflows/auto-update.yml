@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       is_new: ${{ steps.check_ver.outputs.is_new }}
+      img_ver: ${{ steps.check_ver.outputs.img_ver }}
       qbt_ver: ${{ steps.check_ver.outputs.qbt_ver }}
       lib_ver: ${{ steps.check_ver.outputs.lib_ver }}
     steps:
@@ -28,10 +29,12 @@ jobs:
           QBT_VER=$(jq -r '.qbittorrent' ./latest.json)
           PKG_REL=$(jq -r '.pkgrel' ./latest.json)
           if [ ${{ github.event_name }} == 'push' ]; then
-            echo "::set-output name=qbt_ver::${QBT_VER}-r${PKG_REL}"
+            echo "::set-output name=img_ver::${QBT_VER}-r${PKG_REL}"
+            echo "::set-output name=qbt_ver::${QBT_VER}"
             echo "::set-output name=is_new::yes"
           elif [ "${NEW_TAG:8:5}" != "${QBT_VER}" ]; then
-            echo "::set-output name=qbt_ver::${NEW_TAG:8:5}-r0"
+            echo "::set-output name=img_ver::${NEW_TAG:8:5}-r0"
+            echo "::set-output name=qbt_ver::${NEW_TAG:8:5}"
             echo "::set-output name=is_new::yes"
           else
             echo "::set-output name=is_new::no"
@@ -73,7 +76,7 @@ jobs:
           tags: |
             type=edge
             type=schedule,pattern={{date 'YYYYMMDD'}}
-            type=raw,${{ needs.check.outputs.qbt_ver }}
+            type=raw,${{ needs.check.outputs.img_ver }}
             type=raw,latest
 
       - name: Build and push Docker image
