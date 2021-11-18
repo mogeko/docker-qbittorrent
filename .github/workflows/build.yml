@@ -17,9 +17,8 @@ jobs:
       - name: Check version
         id: check_ver
         run: |
-          RAW_VER=$(curl -s "${REPO_TAGS}" | grep -Po "release-(\d+\.){2}\d+\.zip" | head -1)
-          NEW_VER="${RAW_VER:8:5}-r0"
-          echo "::set-output name=new_ver::${NEW_VER}"
+          NEW_TAG=$(curl -s "${REPO_TAGS}" | grep -Po "release-(\d+\.){2}\d+\.zip" | head -1)
+          echo "::set-output name=new_ver::${NEW_TAG:8:5}"
         env:
           REPO_TAGS: https://github.com/qbittorrent/qBittorrent/tags
 
@@ -58,7 +57,7 @@ jobs:
           tags: |
             type=edge
             type=schedule,pattern={{date 'YYYYMMDD'}}
-            type=raw,${{ needs.check.outputs.new_ver }}
+            type=raw,${{ needs.check.outputs.new_ver }}-r0
             type=raw,latest
 
       - name: Save status

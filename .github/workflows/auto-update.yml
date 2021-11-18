@@ -14,14 +14,13 @@ jobs:
       - name: Check version
         id: check_ver
         run: |
-          get_ver() (curl -s "$@" | grep -Po "(\d+\.)+\d+\-r\d+" | head -1)
-          OLD_VER=$(get_ver ${GHCO_URL})
-          NEW_VER=$(get_ver ${ALPINE_PKG_URL})
-          echo "::set-output name=old_ver::${OLD_VER}"
-          echo "::set-output name=new_ver::${NEW_VER}"
+          OLD_TAG=$(curl -s "${GHCO_URL}" | grep -Po "(\d+\.)+\d+\-r\d+" | head -1)
+          NEW_TAG=$(curl -s "${REPO_TAGS}" | grep -Po "release-(\d+\.){2}\d+\.zip" | head -1)
+          echo "::set-output name=old_ver::${OLD_TAG:0:5}"
+          echo "::set-output name=new_ver::${NEW_TAG:8:5}"
         env:
-          ALPINE_PKG_URL: https://pkgs.alpinelinux.org/package/edge/testing/x86_64/qbittorrent-nox
           GHCO_URL: https://github.com/mogeko/docker-qbittorrent/pkgs/container/qbittorrent
+          REPO_TAGS: https://github.com/qbittorrent/qBittorrent/tags
 
   build:
     runs-on: ubuntu-latest
@@ -71,7 +70,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            VERSION=${{ needs.check.outputs.new_ver }}
+            QBITTORRENT_VERSION=${{ needs.check.outputs.new_ver }}-r0
+            LIBTORRENT_VERSION=1.2.14
 
       - name: Save metadata
         run: echo ${{ toJSON(steps.build.outputs.metadata) }} > ${{ github.workspace }}/meta.json
