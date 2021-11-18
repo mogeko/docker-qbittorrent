@@ -1,6 +1,9 @@
 name: update-bot
 
 on:
+  push:
+    branches:
+      - master
   schedule:
     - cron: '30 23 * * *'
 
@@ -8,27 +11,39 @@ jobs:
   check:
     runs-on: ubuntu-latest
     outputs:
-      old_ver: ${{ steps.check_ver.outputs.old_ver }}
-      new_ver: ${{ steps.check_ver.outputs.new_ver }}
+      is_new: ${{ steps.check_ver.outputs.is_new }}
+      qbt_ver: ${{ steps.check_ver.outputs.qbt_ver }}
+      lib_ver: ${{ steps.check_ver.outputs.lib_ver }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
       - name: Check version
         id: check_ver
         run: |
-          OLD_TAG=$(curl -s "${GHCO_URL}" | grep -Po "(\d+\.)+\d+\-r\d+" | head -1)
           NEW_TAG=$(curl -s "${REPO_TAGS}" | grep -Po "release-(\d+\.){2}\d+\.zip" | head -1)
-          echo "::set-output name=old_ver::${OLD_TAG:0:5}"
-          echo "::set-output name=new_ver::${NEW_TAG:8:5}"
+          LIB_VER=$(jq -r '.libtorrent' ./latest.json)
+          QBT_VER=$(jq -r '.qbittorrent' ./latest.json)
+          PKG_REL=$(jq -r '.pkgrel' ./latest.json)
+          if [ ${{ github.event_name }} == 'push' ]; then
+            echo "::set-output name=qbt_ver::${QBT_VER}-r${PKG_REL}"
+            echo "::set-output name=is_new::yes"
+          elif [ "${NEW_TAG:8:5}" != "${QBT_VER}" ]; then
+            echo "::set-output name=qbt_ver::${NEW_TAG:8:5}-r0"
+            echo "::set-output name=is_new::yes"
+          else
+            echo "::set-output name=is_new::no"
+          fi
+          echo "::set-output name=lib_ver::${LIB_VER}"
         env:
-          GHCO_URL: https://github.com/mogeko/docker-qbittorrent/pkgs/container/qbittorrent
           REPO_TAGS: https://github.com/qbittorrent/qBittorrent/tags
 
   build:
     runs-on: ubuntu-latest
     needs: check
-    if: ${{ needs.check.outputs.old_ver != needs.check.outputs.new_ver }}
-    permissions:
-      packages: write
-      contents: read
+    if: ${{ needs.check.outputs.is_new == 'yes' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -58,7 +73,7 @@ jobs:
           tags: |
             type=edge
             type=schedule,pattern={{date 'YYYYMMDD'}}
-            type=raw,${{ needs.check.outputs.new_ver }}
+            type=raw,${{ needs.check.outputs.qbt_ver }}
             type=raw,latest
 
       - name: Build and push Docker image
@@ -70,8 +85,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            QBITTORRENT_VERSION=${{ needs.check.outputs.new_ver }}-r0
-            LIBTORRENT_VERSION=1.2.14
+            QBITTORRENT_VERSION=${{ needs.check.outputs.qbt_ver }}
+            LIBTORRENT_VERSION=${{ needs.check.outputs.lib_ver }}
 
       - name: Save metadata
         run: echo ${{ toJSON(steps.build.outputs.metadata) }} > ${{ github.workspace }}/meta.json

@@ -1,6 +1,6 @@
 # docker-qbittorrent
 
-[![ci_icon]][ci_link] [![image_size]][docker_link]
+[![ci_icon]][ci_link] [![image_size]][docker_link] [![image_ver]][docker_link]
 
 Docker image for qBittorrent. 
 
@@ -8,6 +8,7 @@ Docker image for qBittorrent.
 - Enable rootless[^1]
 - Enable `QBT_*` options[^2]
 - Keep updating
+- Compile by `clang`
 
 ## Usage
 
@@ -91,6 +92,7 @@ The code in this project is released under the [GPL-3.0 License][license].
 [ci_icon]: https://github.com/mogeko/docker-qbittorrent/actions/workflows/auto-update.yml/badge.svg
 [ci_link]: https://github.com/mogeko/docker-qbittorrent/actions/workflows/auto-update.yml
 [image_size]: https://img.shields.io/docker/image-size/mogeko/qbittorrent?logo=docker
+[image_ver]: https://img.shields.io/docker/v/mogeko/qbittorrent?logo=docker
 [docker_link]: https://hub.docker.com/r/mogeko/qbittorrent
 
 <!-- links -->
