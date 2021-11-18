@@ -1,5 +1,5 @@
-LIBTORRENT_VERSION  = 1.2.14
-QBITTORRENT_VERSION = 4.3.8
+LIBTORRENT_VERSION  = $(shell jq -r '.libtorrent' ./latest.json)
+QBITTORRENT_VERSION = $(shell jq -r '.qbittorrent' ./latest.json)
 
 CMD      = /usr/bin/docker
 IMAGE    = mogeko/qbittorrent
