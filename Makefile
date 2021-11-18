@@ -1,6 +1,6 @@
 CMD      = /usr/bin/docker
 IMAGE    = mogeko/qbittorrent
-VERSION  = 4.3.8
+VERSION  = 4.3.8-r0
 PORT     = 8080
 CONF_DIR = $(shell pwd)/example/config
 DL_DIR   = $(shell pwd)/example/data
