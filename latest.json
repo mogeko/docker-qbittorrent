@@ -1,1 +1,5 @@
-docs/latest.json
+{
+    "qbittorrent": "4.3.8",
+    "libtorrent": "1.2.14",
+    "pkgrel": 1
+}
