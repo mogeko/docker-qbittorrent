@@ -17,14 +17,16 @@ jobs:
       - name: Check version
         id: check_ver
         run: |
-          NEW_VER=$(curl -s "${ALPINE_PKG_URL}" | grep -Po "(\d+\.)+\d+\-r\d+" | head -1)
+          RAW_VER=$(curl -s "${REPO_TAGS}" | grep -Po "release-(\d+\.){2}\d+\.zip" | head -1)
+          NEW_VER="${RAW_VER:8:5}-r0"
           echo "::set-output name=new_ver::${NEW_VER}"
         env:
-          ALPINE_PKG_URL: https://pkgs.alpinelinux.org/package/edge/testing/x86_64/qbittorrent-nox
+          REPO_TAGS: https://github.com/qbittorrent/qBittorrent/tags
 
   build:
     runs-on: ubuntu-latest
     needs: check
+    if: ${{ github.event_name == 'pull_request' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
