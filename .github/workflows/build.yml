@@ -19,7 +19,7 @@ jobs:
         id: check_ver
         run: |
           NEW_TAG=$(curl -s "${REPO_TAGS}" | grep -Po "(\d+\.)+\d+(|beta\d+|rc\d+)\.zip" | head -1)
-          if echo "${NEW_TAG%.zip}-r0" | grep -Pq "^(\d+\.)+\d+$"; then
+          if echo "${NEW_TAG%.zip}" | grep -Pq "^(\d+\.){2}\d+$"; then
             echo "::set-output name=latest::type=raw,latest"
           fi
           echo "::set-output name=new_ver::${NEW_TAG%.zip}-r0"
