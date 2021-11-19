@@ -1,20 +1,21 @@
 FROM alpine:3.14 as libtorrent_builder
 
-RUN apk add --no-cache autoconf automake boost-dev build-base clang-dev libtool openssl-dev git
+RUN apk add --no-cache boost-dev build-base clang-dev cmake libtool openssl-dev git
 
 WORKDIR /workspace
 
 ARG LIBTORRENT_VERSION
 ARG LIBTORRENT_GIT=https://github.com/arvidn/libtorrent.git
 RUN git clone --depth 1 --recurse-submodules -b v${LIBTORRENT_VERSION} ${LIBTORRENT_GIT} .
-RUN ./autotool.sh \
-    && ./configure CXXFLAGS="-std=c++14" --prefix=/workspace/pkg --with-libiconv \
+RUN cmake . -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/workspace/pkg \
+    -DCMAKE_CXX_STANDARD=17 \
     && CC=clang make -j$(nproc) \
-    && make install-strip
+    && make install
 
 FROM alpine:3.14 as qbittorrent_builder
 
-RUN apk add --no-cache boost-dev qt5-qtbase-dev qt5-qttools-dev build-base clang git
+RUN apk add --no-cache boost-dev build-base clang-dev cmake qt5-qtbase-dev qt5-qttools-dev git
 
 COPY --from=libtorrent_builder /workspace/pkg /usr
 
@@ -23,7 +24,11 @@ WORKDIR /workspace
 ARG QBITTORRENT_VERSION
 ARG QBITTORRENT_GIT=https://github.com/qbittorrent/qBittorrent.git
 RUN git clone --depth 1 --recurse-submodules -b release-${QBITTORRENT_VERSION} ${QBITTORRENT_GIT} .
-RUN ./configure --prefix=/workspace/pkg --disable-gui \
+RUN cmake . -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/workspace/pkg \
+    -DCMAKE_CXX_STANDARD=17 \
+    -DSTACKTRACE=OFF \
+    -DGUI=OFF \
     && CC=clang make -j$(nproc) \
     && make install
 
