@@ -1,35 +1,34 @@
 FROM alpine:3.14 as libtorrent_builder
 
-RUN apk add --no-cache \
-    autoconf automake binutils boost-dev cppunit-dev libtool linux-headers ncurses-dev openssl-dev zlib-dev \
-    build-base clang tar
+RUN apk add --no-cache boost-dev build-base clang-dev cmake libtool openssl-dev git
 
 WORKDIR /workspace
 
 ARG LIBTORRENT_VERSION
-ADD https://github.com/arvidn/libtorrent/archive/refs/tags/v${LIBTORRENT_VERSION}.tar.gz /workspace
-RUN tar -zxf v${LIBTORRENT_VERSION}.tar.gz -C . \
-    && cd libtorrent-${LIBTORRENT_VERSION} \
-    && ./autotool.sh \
-    && ./configure CXXFLAGS="-std=c++14" --prefix=/workspace/pkg --with-libiconv \
+ARG LIBTORRENT_GIT=https://github.com/arvidn/libtorrent.git
+RUN git clone --depth 1 --recurse-submodules -b v${LIBTORRENT_VERSION} ${LIBTORRENT_GIT} .
+RUN cmake . -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/workspace/pkg \
+    -DCMAKE_CXX_STANDARD=17 \
     && CC=clang make -j$(nproc) \
-    && make install-strip
+    && make install
 
 FROM alpine:3.14 as qbittorrent_builder
 
-RUN apk add --no-cache \
-    boost-dev qt5-qtbase-dev qt5-qttools-dev \
-    build-base clang tar
-
-WORKDIR /workspace
+RUN apk add --no-cache boost-dev build-base clang-dev cmake qt5-qtbase-dev qt5-qttools-dev git
 
 COPY --from=libtorrent_builder /workspace/pkg /usr
 
+WORKDIR /workspace
+
 ARG QBITTORRENT_VERSION
-ADD https://github.com/qbittorrent/qBittorrent/archive/refs/tags/release-${QBITTORRENT_VERSION}.tar.gz /workspace
-RUN tar -zxf release-${QBITTORRENT_VERSION}.tar.gz -C . \
-    && cd qBittorrent-release-${QBITTORRENT_VERSION} \
-    && ./configure --prefix=/workspace/pkg --disable-gui \
+ARG QBITTORRENT_GIT=https://github.com/qbittorrent/qBittorrent.git
+RUN git clone --depth 1 --recurse-submodules -b release-${QBITTORRENT_VERSION} ${QBITTORRENT_GIT} .
+RUN cmake . -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/workspace/pkg \
+    -DCMAKE_CXX_STANDARD=17 \
+    -DSTACKTRACE=OFF \
+    -DGUI=OFF \
     && CC=clang make -j$(nproc) \
     && make install
 
@@ -37,8 +36,8 @@ FROM alpine:3.14
 
 RUN apk add --no-cache busybox libgcc openssl qt5-qtbase zlib
 
-COPY --from=libtorrent_builder /workspace/pkg /usr
 COPY --from=qbittorrent_builder /workspace/pkg /usr
+COPY --from=libtorrent_builder /workspace/pkg /usr
 
 ADD --chown=1000:100 root /
 

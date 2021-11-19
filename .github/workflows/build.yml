@@ -13,12 +13,16 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       new_ver: ${{ steps.check_ver.outputs.new_ver }}
+      latest: ${{ steps.check_ver.outputs.latest }}
     steps:
       - name: Check version
         id: check_ver
         run: |
-          NEW_TAG=$(curl -s "${REPO_TAGS}" | grep -Po "release-(\d+\.){2}\d+\.zip" | head -1)
-          echo "::set-output name=new_ver::${NEW_TAG:8:5}"
+          NEW_TAG=$(curl -s "${REPO_TAGS}" | grep -Po "(\d+\.)+\d+(|beta\d+|rc\d+)\.zip" | head -1)
+          if echo "${NEW_TAG%.zip}" | grep -Pq "^(\d+\.){2}\d+$"; then
+            echo "::set-output name=latest::type=raw,latest"
+          fi
+          echo "::set-output name=new_ver::${NEW_TAG%.zip}-r0"
         env:
           REPO_TAGS: https://github.com/qbittorrent/qBittorrent/tags
 
@@ -44,8 +48,8 @@ jobs:
           tags: |
             type=edge
             type=schedule,pattern={{date 'YYYYMMDD'}}
-            type=raw,${{ needs.check.outputs.new_ver }}-r0
-            type=raw,latest
+            type=raw,${{ needs.check.outputs.new_ver }}
+            ${{ needs.check.outputs.latest }}
 
       - name: Save status
         run: echo ${{ toJSON(steps.meta.outputs.json) }} > ${{ github.workspace }}/status.json
