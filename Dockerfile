@@ -1,6 +1,10 @@
-FROM alpine:3.14 as libtorrent_builder
+FROM alpine:3.14 as base_clang
 
-RUN apk add --no-cache boost-dev build-base clang-dev cmake libtool openssl-dev git
+RUN apk add --no-cache boost-build boost-dev build-base clang-dev cmake
+
+FROM base_clang as libtorrent_builder
+
+RUN apk add --no-cache cmake openssl-dev git
 
 WORKDIR /workspace
 
@@ -14,9 +18,9 @@ RUN cmake . -DCMAKE_BUILD_TYPE=Release \
     && make -j$(nproc) \
     && make install
 
-FROM alpine:3.14 as qbittorrent_builder
+FROM base_clang as qbittorrent_builder
 
-RUN apk add --no-cache boost-dev build-base clang-dev cmake qt5-qtbase-dev qt5-qttools-dev git
+RUN apk add --no-cache cmake qt5-qtbase-dev qt5-qttools-dev git
 
 COPY --from=libtorrent_builder /workspace/pkg /usr
 
