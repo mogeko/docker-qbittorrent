@@ -8,9 +8,10 @@ ARG LIBTORRENT_VERSION
 ARG LIBTORRENT_GIT=https://github.com/arvidn/libtorrent.git
 RUN git clone --depth 1 --recurse-submodules -b v${LIBTORRENT_VERSION} ${LIBTORRENT_GIT} .
 RUN cmake . -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_CXX_COMPILER=clang++ \
     -DCMAKE_INSTALL_PREFIX=/workspace/pkg \
     -DCMAKE_CXX_STANDARD=17 \
-    && CC=clang make -j$(nproc) \
+    && make -j$(nproc) \
     && make install
 
 FROM alpine:3.14 as qbittorrent_builder
@@ -25,11 +26,12 @@ ARG QBITTORRENT_VERSION
 ARG QBITTORRENT_GIT=https://github.com/qbittorrent/qBittorrent.git
 RUN git clone --depth 1 --recurse-submodules -b release-${QBITTORRENT_VERSION} ${QBITTORRENT_GIT} .
 RUN cmake . -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_CXX_COMPILER=clang++ \
     -DCMAKE_INSTALL_PREFIX=/workspace/pkg \
     -DCMAKE_CXX_STANDARD=17 \
     -DSTACKTRACE=OFF \
     -DGUI=OFF \
-    && CC=clang make -j$(nproc) \
+    && make -j$(nproc) \
     && make install
 
 FROM alpine:3.14
