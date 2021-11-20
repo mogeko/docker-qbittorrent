@@ -92,8 +92,8 @@ The code in this project is released under the [GPL-3.0 License][license].
 [ci_icon]: https://github.com/mogeko/docker-qbittorrent/actions/workflows/auto-update.yml/badge.svg
 [ci_link]: https://github.com/mogeko/docker-qbittorrent/actions/workflows/auto-update.yml
 [image_size]: https://img.shields.io/docker/image-size/mogeko/qbittorrent/latest?logo=docker
-[image_ver]: https://img.shields.io/docker/v/mogeko/qbittorrent/latest?logo=docker
-[unstable]: https://img.shields.io/docker/v/mogeko/qbittorrent?label=unstable&logo=docker
+[image_ver]: https://img.shields.io/docker/v/mogeko/qbittorrent/latest?label=latest&logo=docker
+[unstable]: https://img.shields.io/docker/v/mogeko/qbittorrent?label=edge&logo=docker
 [docker_link]: https://hub.docker.com/r/mogeko/qbittorrent
 
 <!-- links -->
