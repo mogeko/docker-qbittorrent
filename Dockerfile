@@ -1,10 +1,10 @@
 FROM alpine:3.14 as base_clang
 
-RUN apk add --no-cache boost-build boost-dev build-base clang-dev cmake
+RUN apk add --no-cache boost-build boost-dev build-base clang-dev cmake ninja
 
 FROM base_clang as libtorrent_builder
 
-RUN apk add --no-cache cmake openssl-dev git
+RUN apk add --no-cache cmake openssl-dev git ninja
 
 WORKDIR /workspace
 
@@ -16,12 +16,13 @@ RUN cmake . -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_C_COMPILER=clang \
     -DCMAKE_INSTALL_PREFIX=/workspace/pkg \
     -DCMAKE_CXX_STANDARD=17 \
-    && make -j$(nproc) \
-    && make install
+    -G Ninja \
+    && ninja -j$(nproc) \
+    && ninja install
 
 FROM base_clang as qbittorrent_builder
 
-RUN apk add --no-cache cmake qt5-qtbase-dev qt5-qttools-dev git
+RUN apk add --no-cache cmake qt5-qtbase-dev qt5-qttools-dev git ninja
 
 COPY --from=libtorrent_builder /workspace/pkg /usr
 
@@ -36,8 +37,9 @@ RUN cmake . -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_CXX_STANDARD=17 \
     -DSTACKTRACE=OFF \
     -DGUI=OFF \
-    && make -j$(nproc) \
-    && make install
+    -G Ninja \
+    && ninja -j$(nproc) \
+    && ninja install
 
 FROM alpine:3.14
 
