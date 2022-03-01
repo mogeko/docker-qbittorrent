@@ -18,7 +18,7 @@ jobs:
       latest: ${{ steps.check_ver.outputs.latest }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
@@ -53,7 +53,7 @@ jobs:
     if: ${{ needs.check.outputs.is_new == 'yes' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
