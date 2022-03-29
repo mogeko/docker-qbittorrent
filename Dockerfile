@@ -1,4 +1,4 @@
-FROM alpine:3.14 as base_clang
+FROM alpine:3.15.3 as base_clang
 
 RUN apk add --no-cache boost-build boost-dev build-base clang-dev cmake ninja
 
@@ -41,7 +41,7 @@ RUN cmake . -DCMAKE_BUILD_TYPE=Release \
     && ninja -j$(nproc) \
     && ninja install
 
-FROM alpine:3.14
+FROM alpine:3.15.3
 
 RUN apk add --no-cache busybox libgcc openssl qt5-qtbase zlib
 
